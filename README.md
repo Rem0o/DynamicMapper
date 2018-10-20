@@ -47,7 +47,7 @@ Test conditions:
 - Mapping a simple POCO with 7 properties
 - 100 000 itterations
 - Manual mapping and DynamicMapper both use a basic SqlConnection/SqlCommand/SqlDataReader implementation like the code exemple above.
-- Dapper uses the SqlConnection.Query<T> extension method.
+- Dapper uses the IDbConnection.Query<T> extension method.
 
 Results:
 
