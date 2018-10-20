@@ -1,4 +1,4 @@
-# DynamicMapper
+# DynamicSqlMapper
 
 Create all your POCO SQL mappers dynamically from your POCO types directly using static reflection and the Roselyn compiler.
 
@@ -8,7 +8,7 @@ The mappers can be compiled once dynamically at startup. Once created, the mappe
 
 ```c#
 // Compiles mappers for all classes under a specific namespace at startup;
-var mapperContainer = new DynamicMapperContainer(
+var mapperContainer = new DynamicSqlMapperContainer(
     this.GetType().Assembly,
     t => t.Namespace == typeof(MyPocoClass).Namespace);
 
