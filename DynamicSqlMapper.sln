@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicMapper", "DynamicMapper\DynamicMapper.csproj", "{287B5E26-5E7B-4F0A-B2A4-6CDFC0037433}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicSqlMapper", "DynamicSqlMapper\DynamicSqlMapper.csproj", "{287B5E26-5E7B-4F0A-B2A4-6CDFC0037433}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicMapper.Test", "DynamicMapper.Test\DynamicMapper.Test.csproj", "{F60FAB5D-C4D9-4290-9A80-BABD0678C682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicSqlMapper.Test", "DynamicSqlMapper.Test\DynamicSqlMapper.Test.csproj", "{F60FAB5D-C4D9-4290-9A80-BABD0678C682}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

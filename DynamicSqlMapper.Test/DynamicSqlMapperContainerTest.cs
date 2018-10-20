@@ -2,7 +2,6 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using Xunit;
 
@@ -28,7 +27,7 @@ namespace DynamicMapper.Test
         }
     }
 
-    public class DynamicMapperContainerTest
+    public class DynamicSqlMapperContainerTest
     {
         private Func<bool> ReadCreator(int i)
         {
@@ -62,14 +61,14 @@ namespace DynamicMapper.Test
         [Fact]
         public void ContainerCreation_TryGetMapper_MapperExist()
         {
-            var container = new DynamicMapperContainer(new Type[] { typeof(POCO) });
+            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
             Assert.True(container.TryGetMapper<POCO>(out var mapper));
         }
 
         [Fact]
         public void Mapper_MapObject_AllPropertiesMapped()
         {
-            var container = new DynamicMapperContainer(new Type[] { typeof(POCO) });
+            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
             container.TryGetMapper<POCO>(out var mapper);
 
             var reader = GetDataReaderMock();
@@ -107,7 +106,7 @@ namespace DynamicMapper.Test
 
             reader = GetDataReaderMock();
             var dynamicList = new List<POCO>();
-            var container = new DynamicMapperContainer(new Type[] { typeof(POCO) });
+            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
             container.TryGetMapper<POCO>(out var mapper);
             while (reader.Read())
             {

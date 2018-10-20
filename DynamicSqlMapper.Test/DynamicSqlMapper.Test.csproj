@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DynamicMapper\DynamicMapper.csproj" />
+    <ProjectReference Include="..\DynamicSqlMapper\DynamicSqlMapper.csproj" />
   </ItemGroup>
 
 </Project>

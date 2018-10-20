@@ -8,13 +8,13 @@ using System.Reflection;
 
 namespace DynamicMapper
 {
-    public class DynamicMapperContainer
+    public class DynamicSqlMapperContainer : IDynamicSqlMapperContainer
     {
         private readonly Dictionary<Type, object> _dictionnary = new Dictionary<Type, object>();
 
-        public DynamicMapperContainer(Assembly assembly, Func<Type, bool> typeFilter) : this(assembly.GetTypes().Where(typeFilter).ToArray()) { }
+        public DynamicSqlMapperContainer(Assembly assembly, Func<Type, bool> typeFilter) : this(assembly.GetTypes().Where(typeFilter).ToArray()) { }
 
-        public DynamicMapperContainer(Type[] types)
+        public DynamicSqlMapperContainer(Type[] types)
         {
             // [PART 1] Generate the code as string       
             var containerName = "list";
@@ -35,6 +35,28 @@ namespace DynamicMapper
 
             // [PART 3] Get the generated code evaluation result       
             _dictionnary = task.Result;
+        }
+
+        public bool TryGetMapper<T>(out Action<IDataReader, T> mapper)
+        {
+            mapper = null;
+
+            var success = _dictionnary.TryGetValue(typeof(T), out var m);
+            if (success)
+                mapper = (Action<IDataReader, T>)m;
+            else
+            {
+                var type = typeof(T);
+                if (_dictionnary.ContainsKey(type))
+                    return false;
+                else
+                {
+                    _dictionnary.Add(typeof(T), GetSingleMapper<T>());
+                    return TryGetMapper<T>(out mapper);
+                }
+            }
+
+            return success;
         }
 
         private ScriptOptions GetScriptOptions(params Assembly[] assemblies)
@@ -84,28 +106,6 @@ namespace DynamicMapper
             var task = CSharpScript.EvaluateAsync<Action<IDataReader, T>>(GetMapperExpression(type), GetScriptOptions(type.Assembly));
             task.Wait();
             return task.Result;
-        }
-
-        public bool TryGetMapper<T>(out Action<IDataReader, T> mapper)
-        {
-            mapper = null;
-
-            var success = _dictionnary.TryGetValue(typeof(T), out var m);
-            if (success)
-                mapper = (Action<IDataReader, T>)m;
-            else
-            {
-                var type = typeof(T);
-                if (_dictionnary.ContainsKey(type))
-                    return false;
-                else
-                {
-                    _dictionnary.Add(typeof(T), GetSingleMapper<T>());
-                    return TryGetMapper<T>(out mapper);
-                }
-            }
-
-            return success;
         }
     }
 }
