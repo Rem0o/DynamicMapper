@@ -17,10 +17,11 @@ namespace DynamicMapper
         public DynamicSqlMapperContainer(Type[] types)
         {
             // [PART 1] Generate the code as string       
-            var containerName = "list";
-            var varPrefix = "type";
+            var containerName = "dictionary";
+            var varPrefix = "mapper";
             // declare a new empty dictionary
-            var mapperContainerCode = $"var {containerName} = new Dictionary<Type, object>();";
+            var mapperContainerCode = $"var {containerName} = new {typeof(Dictionary<Type, object>).Name.Replace("`2", "")}"
+                + $"<{typeof(Type).Name}, {typeof(object).Name}>();";
             // for each type, create a mapping Action and add it into the dictionary
             var mapperCreationCode = types.Select(MapperCodeGeneratorFactory(varPrefix));
             var addMapperToContainerCode = types.Select(AddIntoContainerCodeGeneratorFactory(varPrefix, containerName));
@@ -52,7 +53,7 @@ namespace DynamicMapper
                 else
                 {
                     _dictionnary.Add(typeof(T), GetSingleMapper<T>());
-                    return TryGetMapper<T>(out mapper);
+                    return TryGetMapper(out mapper);
                 }
             }
 
@@ -61,7 +62,10 @@ namespace DynamicMapper
 
         private ScriptOptions GetScriptOptions(params Assembly[] assemblies)
         {
-            return ScriptOptions.Default.WithImports("System", "System.Collections.Generic", "System.Data").WithReferences(assemblies);
+            return ScriptOptions.Default.WithImports(
+                typeof(object).Namespace, 
+                typeof(Dictionary<string, object>).Namespace, 
+                typeof(IDataReader).Namespace).WithReferences(assemblies);
         }
 
         private Func<Type, int, string> MapperCodeGeneratorFactory(string varPrefix)
@@ -90,14 +94,15 @@ namespace DynamicMapper
         private string GetPropertyTypeString(Type propertyType)
         {
             if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                return $"Nullable<{propertyType.GetGenericArguments()[0]}>";
+                return $"{typeof(Nullable).Name}<{propertyType.GetGenericArguments()[0]}>";
             else
                 return propertyType.ToString();
         }
 
         private Func<Type, int, string> AddIntoContainerCodeGeneratorFactory(string varPrefix, string containerName)
         {
-            return (type, index) => $"{containerName}.Add(typeof({type.FullName}), {varPrefix}{index});";
+            Dictionary<Type, object> dummy = null;
+            return (type, index) => $"{containerName}.{nameof(dummy.Add)}(typeof({type.FullName}), {varPrefix}{index});";
         }
 
         private Action<IDataReader, T> GetSingleMapper<T>()
