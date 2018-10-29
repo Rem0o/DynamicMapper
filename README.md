@@ -1,4 +1,4 @@
-# DynamicSqlMapper
+# DynamicSqlMapper [![Build Status](https://travis-ci.com/Rem0o/DynamicSqlMapper.svg?branch=master)](https://travis-ci.com/Rem0o/DynamicSqlMapper)
 
 Create all your POCO SQL mappers dynamically from your POCO types directly using static reflection and the Roselyn compiler.
 
