@@ -7,27 +7,8 @@ using Xunit;
 
 namespace DynamicMapper.Test
 {
-    public class POCO
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public DateTime Date { get; set; }
-        public int? Count { get; set; }
-        public long Long { get; set; }
-        public bool Question { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is POCO casted)
-                return this.GetType()
-                    .GetProperties()
-                    .All(prop => prop.GetValue(this)?.Equals(prop.GetValue(obj)) ?? prop.GetValue(obj) == null);
-
-            return false;
-        }
-    }
-
-    public class DynamicSqlMapperContainerTest
+    public class DataReaderMapperTest
     {
         private Func<bool> ReadCreator(int i)
         {
@@ -58,26 +39,32 @@ namespace DynamicMapper.Test
             return mock.Object;
         }
 
+        private IDynamicMapperContainer<IDataReader> GetContainer() => new DynamicMapperContainer<IDataReader>(
+            (reader, propertyName) => reader[propertyName])
+            .CompileMappers(new Type[] { typeof(POCO) });
+
         [Fact]
-        public void ContainerCreation_TryGetMapper_MapperExist()
+        public void ContainerCreation_GetMapper_MapperExist()
         {
-            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
-            Assert.True(container.TryGetMapper<POCO>(out var mapper));
+            var container = GetContainer()
+                .GetMapper<POCO>(out var mapper);
+
+            Assert.NotNull(mapper);
         }
 
         [Fact]
         public void Mapper_MapObject_AllPropertiesMapped()
         {
-            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
-            container.TryGetMapper<POCO>(out var mapper);
+            var container = GetContainer()
+                .GetMapper<POCO>(out var mapper);
 
-            var reader = GetDataReaderMock();
+            var dataReader = GetDataReaderMock();
 
             var list = new List<POCO>();
-            while (reader.Read())
+            while (dataReader.Read())
             {
                 POCO poco = new POCO();
-                mapper(reader, poco);
+                mapper(dataReader, poco);
                 list.Add(poco);
             }
 
@@ -89,29 +76,29 @@ namespace DynamicMapper.Test
         [Fact]
         public void ManualMapping_SameOutput()
         {
-            var reader = GetDataReaderMock();
+            var dataReader = GetDataReaderMock();
             var manualList = new List<POCO>();
-            while (reader.Read())
+            while (dataReader.Read())
             {
                 manualList.Add(new POCO()
                 {
-                    Id = (Guid)reader["Id"],
-                    Name = (string)reader["Name"],
-                    Date = (DateTime)reader["Date"],
-                    Count = (int?)reader["Count"],
-                    Long = (long)reader["Long"],
-                    Question = (bool)reader["Question"]
+                    Id = (Guid)dataReader["Id"],
+                    Name = (string)dataReader["Name"],
+                    Date = (DateTime)dataReader["Date"],
+                    Count = (int?)dataReader["Count"],
+                    Long = (long)dataReader["Long"],
+                    Question = (bool)dataReader["Question"]
                 });
             }
 
-            reader = GetDataReaderMock();
+            dataReader = GetDataReaderMock();
             var dynamicList = new List<POCO>();
-            var container = new DynamicSqlMapperContainer(new Type[] { typeof(POCO) });
-            container.TryGetMapper<POCO>(out var mapper);
-            while (reader.Read())
+            var container = GetContainer();
+            container.GetMapper<POCO>(out var mapper);
+            while (dataReader.Read())
             {
                 var poco = new POCO();
-                mapper(reader, poco);
+                mapper(dataReader, poco);
                 dynamicList.Add(poco);
             }
 

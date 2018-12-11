@@ -7,35 +7,33 @@ The mappers can be compiled once dynamically at startup. Once created, the mappe
 ### Code exemple
 
 ```c#
-// Compiles mappers for all classes under a specific namespace at startup;
-var mapperContainer = new DynamicSqlMapperContainer(
-    this.GetType().Assembly,
-    t => t.Namespace == typeof(MyPocoClass).Namespace);
-
+// Compiles mappers for all classes under a specific namespace at startup to map from a IDataReader object;
+var mapperContainer = new DynamicMapperContainer<IDataReader>((reader, propertyName) => reader[propertyName])
+    .CompileMappers(this.GetType().Assembly, t => t.Namespace == typeof(MyPocoClass).Namespace);
 // (...)
 
 // If the type was not included during the container construction, the container will try to compile the mapper
 // for the given class dynamically and cache it for later use. 
-if (mapperContainer.TryGetMapper<MyPocoClass>(out Action<IDataReader, MyPocoClass> mapper))
+mapperContainer.TryGetMapper<MyPocoClass>(out Action<IDataReader, MyPocoClass> mapper);
+
+// use mapper here ...
+using (var connection = new SqlConnection("some connection string"))
 {
-    // use mapper here ...
-    using (var connection = new SqlConnection("some connection string"))
+    SqlCommand command = new SqlCommand("SELECT * FROM SomeTable", connection);
+    connection.Open();
+    
+    SqlDataReader reader = command.ExecuteReader();
+    
+    while (reader.Read())
     {
-        SqlCommand command = new SqlCommand("SELECT * FROM SomeTable", connection);
-        connection.Open();
-        
-        SqlDataReader reader = command.ExecuteReader();
-        
-        while (reader.Read())
-        {
-            var poco = new MyPocoClass();
-            mapper(reader, poco);
-            // poco was mapped!
-        }
-        
-        reader.Close();
+        var poco = new MyPocoClass();
+        mapper(reader, poco);
+        // poco was mapped!
     }
+    
+    reader.Close();
 }
+
 
 ```
 
