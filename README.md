@@ -1,20 +1,20 @@
-# DynamicSqlMapper [![Build Status](https://travis-ci.com/Rem0o/DynamicSqlMapper.svg?branch=master)](https://travis-ci.com/Rem0o/DynamicSqlMapper)
+# DynamicMapper [![Build Status](https://travis-ci.com/Rem0o/DynamicMapper.svg?branch=master)](https://travis-ci.com/Rem0o/DynamicMapper)
 
-Create all your POCO SQL mappers dynamically from your POCO types directly using static reflection and the Roselyn compiler.
+Create all your POCO mappers dynamically from your POCO types directly using static reflection and the Roselyn compiler.
 
-The mappers can be compiled once dynamically at startup. Once created, the mappers are then cached. Each mapper should give similar performance to manual object mapping directly from a IDataReader object.
+The mappers can be compiled once dynamically at startup. Once created, the mappers are then cached. Each mapper should give similar performance to manual object mapping directly from your source object.
 
 ### Code exemple
 
 ```c#
-// Compiles mappers for all classes under a specific namespace at startup to map from a IDataReader object;
+// Compiles mappers for all classes under a specific namespace at startup to map from a IDataReader source object;
 var mapperContainer = new DynamicMapperContainer<IDataReader>((reader, propertyName) => reader[propertyName])
     .CompileMappers(this.GetType().Assembly, t => t.Namespace == typeof(MyPocoClass).Namespace);
 // (...)
 
 // If the type was not included during the container construction, the container will try to compile the mapper
 // for the given class dynamically and cache it for later use. 
-mapperContainer.TryGetMapper<MyPocoClass>(out Action<IDataReader, MyPocoClass> mapper);
+mapperContainer.GetMapper<MyPocoClass>(out Action<IDataReader, MyPocoClass> mapper);
 
 // use mapper here ...
 using (var connection = new SqlConnection("some connection string"))
